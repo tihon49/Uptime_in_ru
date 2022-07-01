@@ -1,4 +1,14 @@
 import re
+import subprocess
+
+
+
+year_reg = r'[0-9]+ year'
+month_reg = r'[0-9]+ month'
+week_reg = r'[0-9]+ week'
+day_reg = r'[0-9]+ day'
+hour_reg = r'[0-9]+ hour'
+minute_reg = r'[0-9]+ minute'
 
 
 
@@ -45,13 +55,6 @@ def parse_uptime(uptime) -> str:
     hours_list = ['час', 'часа', 'часов']
     minutes_list = ['минута', 'минуты', 'минут']
 
-    year_reg = r'[0-9]+ year'
-    month_reg = r'[0-9]+ month'
-    week_reg = r'[0-9]+ week'
-    day_reg = r'[0-9]+ day'
-    hour_reg = r'[0-9]+ hour'
-    minute_reg = r'[0-9]+ minute'
-
     date_to_web += create_string(year_reg, uptime, years_list)
     date_to_web += create_string(month_reg, uptime, months_list)
     date_to_web += create_string(week_reg, uptime, weeks_list)
@@ -60,6 +63,32 @@ def parse_uptime(uptime) -> str:
     date_to_web += create_string(minute_reg, uptime, minutes_list)
 
     return date_to_web.strip()
+
+
+def _shell(cmd):
+    proc = subprocess.Popen(
+        cmd,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    try:
+        result = proc.communicate()
+        out = result[0].decode('utf-8')
+        error = result[1].decode('utf-8')
+    except Exception as e:
+        raise ValueError(f'Error: {e}')
+    if proc.returncode == 0:
+        return True, out
+    return False, error
+
+
+def days_count_from_uptime() -> int:
+    """возвращает кол-во дней из uptime"""
+    cmd = "uptime | awk -F'( |,|:)+' " + "'{print $6}'"
+    state, res = _shell(cmd)
+    if state:
+        return int(res)
 
 
 
