@@ -2,12 +2,12 @@ import re
 
 
 
-def uptime_to_web(value, words_list):
+def uptime_to_web(value, words_list) -> str:
     """
     value: число
     words_list: словарь типа ['день', 'дня', 'дней']
 
-    выводит число и лет/месяцев/недель/дней/часов/минут с учетом склонения
+    возвращает число и лет/месяцев/недель/дней/часов/минут с учетом склонения
     примеры: 1 год / 2 месяца / 3 недели / 4 дня / 15 часов / 45 минут
     """
     value = int(value)
@@ -19,11 +19,22 @@ def uptime_to_web(value, words_list):
     return f'{value} {words_list[2]}'
 
 
-def parse_uptime(uptime):
+
+def create_string(reg_exp, uptime, words_list) -> str:
+    """возвращает строку для добавления к строке вывода uptime на русском"""
+    if re.search(reg_exp, uptime):
+        data = re.search(reg_exp, uptime).group().split()[0]
+        return uptime_to_web(data, words_list) + " "
+    return ""
+
+
+
+def parse_uptime(uptime) -> str:
     """
     uptime: строка полученная из команды 'uptime -p'
 
     парсит uptime и выводит его на русском в правильном склонении
+    возвращает полную строку uptime'а
     """
     date_to_web = ''
 
@@ -41,25 +52,17 @@ def parse_uptime(uptime):
     hour_reg = r'[0-9]+ hour'
     minute_reg = r'[0-9]+ minute'
 
-    if re.search(year_reg, uptime):
-        year = re.search(year_reg, uptime).group().split()[0]
-        date_to_web += uptime_to_web(year, years_list) + " "
-    if re.search(month_reg, uptime):
-        month = re.search(month_reg, uptime).group().split()[0]
-        date_to_web += uptime_to_web(month, months_list) + " "
-    if re.search(week_reg, uptime):
-        week = re.search(week_reg, uptime).group().split()[0]
-        date_to_web += uptime_to_web(week, weeks_list) + " "
-    if re.search(day_reg, uptime):
-        day = re.search(day_reg, uptime).group().split()[0]
-        date_to_web += uptime_to_web(day, days_list) + " "
-    if re.search(hour_reg, uptime):
-        hour = re.search(hour_reg, uptime).group().split()[0]
-        date_to_web += uptime_to_web(hour, hours_list) + " "
-    if re.search(minute_reg, uptime):
-        minute = re.search(minute_reg, uptime).group().split()[0]
-        date_to_web += uptime_to_web(minute, minutes_list)
+    date_to_web += create_string(year_reg, uptime, years_list)
+    date_to_web += create_string(month_reg, uptime, months_list)
+    date_to_web += create_string(week_reg, uptime, weeks_list)
+    date_to_web += create_string(day_reg, uptime, days_list)
+    date_to_web += create_string(hour_reg, uptime, hours_list)
+    date_to_web += create_string(minute_reg, uptime, minutes_list)
 
     return date_to_web.strip()
 
+
+
+# print(parse_uptime('up 4 years, 1 month, 3 weeks, 21 days, 15 hours, 45 minutes'))
+# Out: '4 года 1 месяц 3 недели 21 день 15 часов 45 минут'
 
