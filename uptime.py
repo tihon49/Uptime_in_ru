@@ -101,5 +101,5 @@ def days_count_from_uptime() -> int:
 print(parse_uptime('up 1 year, 2 months, 3 weeks, 21 days, 15 hours, 45 minutes'))
 # Out: 1 год, 2 месяца, 3 недели, 21 день, 15 часов, 45 минут
 
-print(uptime_to_web(days_count_from_uptime(), ['день', 'дня', 'дней']))
+print(uptime_to_web(days_count_from_uptime(), days_list))
 # Out: 15 дней
